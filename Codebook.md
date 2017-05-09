@@ -30,7 +30,7 @@ From the data set in step 4, creates a second, independent tidy data set with th
 
 ## Description of abbreviations of measurements
 
-leading t or f is based on time or frequency measurements.
+->leading t or f is based on time or frequency measurements.
 
 Body = related to body movement.
 
@@ -44,7 +44,9 @@ Jerk = sudden movement acceleration
 
 Mag = magnitude of movement
 
-mean and SD are calculated for each subject for each activity for each mean and SD measurements.
+->mean and SD are calculated for each subject for each activity for each mean and SD measurements.
+
+->Appropriate Labels given to data set variables
 
  [1] "timeBodyAccelerometer-mean()-X"                
  [2] "timeBodyAccelerometer-mean()-Y"                
@@ -116,21 +118,25 @@ mean and SD are calculated for each subject for each activity for each mean and 
 [68] "activity"
 
 
-The set of variables that were estimated from these signals are:
+->The set of variables that were estimated from these signals are:
 
 mean(): Mean value
 std(): Standard deviation
 
 
 # Download Data
+
 if(!file.exists("./data")){dir.create("./data")}
+
 fileUrl <- "https://d396qusza40orc.cloudfront.net/getdata%2Fprojectfiles%2FUCI%20HAR%20Dataset.zip"
 download.file(fileUrl,destfile="./data/Dataset.zip",method="curl")
 
-Unzip the file
+-Unzip the file
+
 unzip(zipfile="./data/Dataset.zip",exdir="./data")
 
-Get the list of the files
+-Get the list of the files
+
 path_rf <- file.path("./data" , "UCI HAR Dataset")
 files<-list.files(path_rf, recursive=TRUE)
 files
@@ -164,19 +170,23 @@ files
 [27] "train/X_train.txt"                           
 [28] "train/y_train.txt" 
 
-Read Acitivity files
+-Read Acitivity files
+
 actTest<- read.table(file.path(path_rf, "test" , "Y_test.txt" ),header = FALSE)
 actTrain <- read.table(file.path(path_rf, "train", "Y_train.txt"),header = FALSE)
 
-Read Subject files
+-Read Subject files
+
 subTest  <- read.table(file.path(path_rf, "test" , "subject_test.txt"),header = FALSE)
 subTrain <- read.table(file.path(path_rf, "train", "subject_train.txt"),header = FALSE)
 
-Read feature Files
+-Read feature Files
+
 featureTest  <- read.table(file.path(path_rf, "test" , "X_test.txt" ),header = FALSE)
 featureTrain <- read.table(file.path(path_rf, "train", "X_train.txt"),header = FALSE)
 
-Display Properties of variables
+-Display Properties of variables
+
 str(actTest)
 str(actTrain)
 str(subTest)
@@ -184,41 +194,49 @@ str(subTrain)
 str(featureTest)
 str(featureTrain)
 
-Combine data tables by rows
+-Combine data tables by rows
+
 dataSub <- rbind(subTrain, subTest)
 dataAct<- rbind(actTrain, actTest)
 dataFeat<- rbind(featureTrain,featureTest)
 
-Set names for variables
+-Set names for variables
+
 names(dataSub)<-c("subject")
 names(dataAct)<- c("activity")
 dataFeatNames <- read.table(file.path(path_rf, "features.txt"),head=FALSE)
 names(dataFeat)<- dataFeatNames$V2
 
-Merge cols to get data frame
+-Merge columns to get data frame
+
 dataCombine <- cbind(dataSub, dataAct)
 Data <- cbind(dataFeat, dataCombine)
 
-Subset names of features by measurements
+-Subset names of features by measurements
+
 subdataFeatNames<-dataFeatNames$V2[grep("mean\\(\\)|std\\(\\)", dataFeatNames$V2)]
 
-Subset data frame by selected name of features
+-Subset data frame by selected name of features
+
 selectedNames<-c(as.character(subdataFeatNames), "subject", "activity" )
 Data<-subset(Data,select=selectedNames)
 
-Check structure of data frame
+-Check structure of data frame
+
 str(Data)
 
-Uses descriptive activity names to name activities in data set
+-Uses descriptive activity names to name activities in data set
+
 activityLabels <- read.table(file.path(path_rf, "activity_labels.txt"),header = FALSE)
 
-factorize variable activity in data frame 
+-factorize variable activity in data frame 
+
 Data$activity<-factor(Data$activity);
 Data$activity<- factor(Data$activity,labels=as.character(activityLabels$V2))
 
 head(Data$activity,30)
 
-Appropriately labels the data set
+-Appropriately labels the data set
 names(Data)<-gsub("^t", "time", names(Data))
 names(Data)<-gsub("^f", "frequency", names(Data))
 names(Data)<-gsub("Acc", "Accelerometer", names(Data))
@@ -226,10 +244,11 @@ names(Data)<-gsub("Gyro", "Gyroscope", names(Data))
 names(Data)<-gsub("Mag", "Magnitude", names(Data))
 names(Data)<-gsub("BodyBody", "Body", names(Data))
 
-check
+-check
 names(Data)
 
-Create 2nd independent tidy set and output it
+-Create 2nd independent tidy set and output it
+
 library(plyr);
 dataTidy<-aggregate(. ~subject + activity, Data, mean)
 dataTidy<-dataTidy[order(dataTidy$subject,dataTidy$activity),]
